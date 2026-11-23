@@ -1,6 +1,6 @@
 # Frá fjöru til fjalls — vefur
 
-Vefur hlaðvarpsins *Frá fjöru til fjalls* (Skjáskot). Stöðusíður, byggðar með einu Node-skripti og birtar sem Cloudflare Worker með static assets.
+Vefur hlaðvarpsins *Frá fjöru til fjalls* (Skjáskot). Kyrrstæðar síður, byggðar með einu Node-skripti og birtar sem Cloudflare Worker með static assets.
 
 - Slóð: `/podcast/fra-fjoru-til-fjalls/` (sama slóð á prufuslóð og á skjaskot.is)
 - Prufa: https://fra-fjoru-til-fjalls.toddigodi.workers.dev/podcast/fra-fjoru-til-fjalls/
@@ -28,6 +28,13 @@ Engar npm-háðir. Úttakið fer í `dist/`, sem er ekki í git.
 ## Birting
 
 Push á `main` byggir og birtir sjálfkrafa þegar repóið er tengt Workernum í Cloudflare (Workers Builds).
+
+Stillingar í Cloudflare (Settings → Builds):
+
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
+
+Workers Builds keyrir ekki `build`-skipunina í `wrangler.jsonc`, svo Build command verður að vera stillt í Cloudflare. Hún í `wrangler.jsonc` er fyrir `wrangler dev` og `wrangler deploy` á eigin vél.
 
 ## Reglur
 
