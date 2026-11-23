@@ -153,8 +153,8 @@ table.rows th[scope="row"] { font-family: var(--font-display); font-weight: 500;
 .chapters .t { font-variant-numeric: tabular-nums; color: var(--ink-muted); font-size: 13px; flex: none; width: 40px; }
 .chapters a.t { text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; }
 .chapters a.t:hover { color: var(--ink); text-decoration-color: var(--ink); }
-.larder { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border-top: 2px solid var(--ink); }
-.larder li { display: flex; flex-direction: column; gap: 6px; padding: 18px 12px 18px 0; border-bottom: 1px solid var(--line); }
+.larder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--ink); }
+.larder li { display: flex; flex-direction: column; gap: 6px; padding: 18px 20px 18px 0; border-bottom: 1px solid var(--line); }
 .larder .ico { width: 56px; height: 56px; }
 .larder .name { font-family: var(--font-display); font-weight: 500; font-size: 22px; line-height: 26px; }
 .transcript { border: 1px solid var(--line); background: var(--ground-deep); padding: 24px; display: flex; flex-direction: column; gap: 14px; }
@@ -192,25 +192,78 @@ a.month:hover .name { text-decoration: underline; text-decoration-color: var(--m
 .wheel.lg { width: 400px; max-width: 100%; height: auto; }
 .section:has(> .wheel.lg) { position: relative; }
 
+/* ---------- origin: map, cross-section, mark ---------- */
+.origin-head { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 40px 56px; align-items: end; }
+.origin-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); gap: 32px 48px; align-items: center; }
+.origin-two.map-first { grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr); }
+.coords { border-top: 2px solid var(--ink); }
+.coords li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 18px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.coords h3 { font-size: 26px; line-height: 28px; }
+.coords .wheel.sm, .coords .rose { width: 60px; height: 60px; }
+.coords .ladder { width: 60px; height: 36px; }
+.ab-inline { font-family: var(--font-display); font-size: 21px; color: var(--rust); }
+.omap, .profile { display: block; width: 100%; height: auto; }
+.omap use, .omap path { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.omap .sea { stroke: var(--line); } .omap .erase { stroke: var(--ground); } .omap .landfill { fill: var(--ground); }
+.omap .r1, .omap .r2 { stroke: var(--moss-faint); } .omap .r3 { stroke: var(--moss); }
+.omap .coast { stroke: var(--ink); stroke-width: 1.75; }
+.omap .bound { stroke: var(--ink-muted); stroke-width: 1.1; stroke-dasharray: 3 6; }
+.omap .tick { stroke: var(--line); stroke-width: 1; }
+.omap .dir, .omap .nm, .profile text { font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.14em; fill: var(--ink-muted); }
+.omap .nm { fill: var(--ink); font-size: 10.5px; }
+.omap .red { stroke: var(--rust); stroke-width: 1.75; }
+.omap .knot, .profile .knot { fill: var(--ground); stroke: var(--rust); stroke-width: 1.75; }
+.omap .knot.on, .profile .knot.on { fill: var(--rust); }
+.omap .ab, .profile text.ab { font-family: var(--font-display); font-style: italic; font-size: 22px; letter-spacing: 0; fill: var(--rust); text-anchor: start; }
+.omap .lead { stroke: var(--ink); stroke-width: 1; }
+.omap .pin { fill: var(--rust); stroke: var(--ground); stroke-width: 1.5; }
+.omap .badge { fill: var(--ground); stroke: var(--ink); stroke-width: 1; }
+.omap .pic, .profile use { fill: none; stroke: var(--ink); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.profile path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.profile .t1 { stroke: var(--ink); stroke-width: 2; } .profile .c1 { stroke: var(--moss-faint); stroke-width: 1.5; } .profile .c2 { stroke: var(--moss); stroke-width: 1.5; }
+.profile .base { stroke: var(--line); stroke-width: 1; } .profile .dot { fill: var(--rust); } .profile text { text-anchor: middle; }
+.rose { display: block; flex: none; } .rose path { fill: none; stroke: var(--ink-muted); stroke-width: 1.4; }
+.rose path.on { fill: var(--rust); stroke: var(--rust); } .rose .north { stroke: var(--ink); stroke-width: 1.75; }
+.ladder { display: block; flex: none; } .ladder rect { fill: none; stroke: var(--ink-muted); stroke-width: 1.2; }
+.ladder rect.on { fill: var(--rust); stroke: var(--rust); }
+.mark { display: flex; align-items: flex-end; gap: 14px; margin-top: 8px; padding: 12px 14px; background: var(--ground-deep); border: 1px solid var(--line); }
+.mini { display: block; flex: 1 1 0; min-width: 0; max-width: 150px; height: auto; }
+.mini .mfill { fill: var(--ground); } .mini .mlit { fill: var(--moss-faint); }
+.mini .mcoast { fill: none; stroke: var(--ink); stroke-width: 5; stroke-linejoin: round; }
+.mini .mpin { fill: var(--rust); stroke: var(--ground-deep); stroke-width: 8; }
+.mark .ladder { width: 40%; max-width: 92px; height: auto; margin-left: auto; }
+.code { font-size: 12px; margin-top: 4px; color: var(--ink); }
+.origins { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 24px; }
+.origin-top { display: flex; gap: 12px; align-items: center; }
+.origin-top h3 { font-size: 26px; line-height: 28px; }
+
 /* ---------- responsive ---------- */
 @media (min-width: 901px) {
   .section:has(> .wheel.lg) { min-height: 330px; }
   .wheel.lg { position: absolute; right: 0; top: 30px; }
 }
 @media (max-width: 900px) {
-  .two, .ep-body, .people { grid-template-columns: minmax(0, 1fr); }
+  .two, .ep-body, .people, .origin-head, .origin-two, .origin-two.map-first { grid-template-columns: minmax(0, 1fr); }
+  .origins { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nav { gap: 4px 20px; }
   .three { grid-template-columns: minmax(0, 1fr); }
   .months { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .hero { display: flex; flex-direction: column-reverse; }
   .hero .wrap { padding-bottom: 16px; width: 100%; }
   .scene { position: static; width: 100%; height: auto; }
-  .larder { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .larder { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .thread { display: none; }
 }
 @media (max-width: 520px) {
   .wrap { padding: 0 16px; }
   .months { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .larder { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .larder li { padding-right: 12px; }
+  .origins { gap: 24px 14px; }
+  .omap-wrap { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
+  .omap { min-width: 600px; }
+  .mark { gap: 8px; padding: 10px; }
+  .nav { gap: 2px 12px; }
+  .nav a { font-size: 13px; letter-spacing: 0.04em; }
   .frame-words { right: 6%; }
   .section { padding: 40px 0; }
   .quote { font-size: 25px; line-height: 32px; }

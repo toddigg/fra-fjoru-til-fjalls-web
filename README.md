@@ -14,6 +14,7 @@ Vefur hlaðvarpsins *Frá fjöru til fjalls* (Skjáskot). Kyrrstæðar síður, 
 | `src/shell.html` | Rammi allra síðna: haus, valmynd, fótur. |
 | `src/pages/*.html` | Efni hverrar síðu. |
 | `src/site.css`, `src/site.js` | Útlit og hegðun. |
+| `src/geo/iceland.json` | Strandlína Íslands fyrir upprunakortið (Natural Earth). Endurgerð með `tools/geo.mjs`. |
 | `public/` | Skrár sem fara óbreyttar á vefinn (ljósmyndir o.fl.) undir `/podcast/fra-fjoru-til-fjalls/`. |
 | `wrangler.jsonc` | Stillingar fyrir Cloudflare. |
 

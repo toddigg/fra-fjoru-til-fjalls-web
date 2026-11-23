@@ -28,11 +28,19 @@ const EP1 = {
     [1651, "kafli-smultron", "Smultronstället"],
     [2001, "kafli-fram", "Fram undan"]
   ],
-  // [icon, name, place] ordered from sea to heath
+  // [icon, name, place in the episode, origin] ordered from sea to heath.
+  // origin: q = quarter (V N A S), belt = 0 sjór, 1 fjara, 2 akur, 3 heiði, 4 fjall, at = [lon, lat],
+  // off / side = where the badge and its label sit on the big map.
+  // DEMO DATA: the places are examples to show the system, not confirmed sourcing from the episode.
   larder: [
-    ["i-igulker", "Ígulker", "Bryggjan"], ["i-scallop", "Hörpuskel", "Sjórinn"], ["i-sol", "Söl", "Fjaran"],
-    ["i-kartafla", "Kartaflan", "Garðurinn"], ["i-gulrot", "Gulrót", "Garðurinn"], ["i-hundasura", "Hundasúra", "Túnið"],
-    ["i-lamb", "Lamb", "Heiðin"], ["i-blodberg", "Blóðberg", "Vegkanturinn"]
+    ["i-igulker", "Ígulker", "Bryggjan", { q: "A", belt: 0, where: "Austfirðir", at: [-13.5, 64.6], off: [44, 40], side: "below" }],
+    ["i-scallop", "Hörpuskel", "Sjórinn", { q: "V", belt: 0, where: "Breiðafjörður", at: [-23.0, 65.25], off: [-78, -2], side: "above" }],
+    ["i-sol", "Söl", "Fjaran", { q: "S", belt: 1, where: "Suðurströndin", at: [-21.05, 63.83], off: [-58, 36], side: "below" }],
+    ["i-kartafla", "Kartaflan", "Garðurinn", { q: "N", belt: 2, where: "Eyjafjörður", at: [-18.05, 65.72], off: [-20, -96], side: "left" }],
+    ["i-gulrot", "Gulrót", "Garðurinn", { q: "S", belt: 2, where: "Flúðir", at: [-20.33, 64.13], off: [-125, -30], side: "left" }],
+    ["i-hundasura", "Hundasúra", "Túnið", { q: "V", belt: 2, where: "Vestfirðir", at: [-22.6, 65.75], off: [-66, -52], side: "above" }],
+    ["i-lamb", "Lamb", "Heiðin", { q: "A", belt: 3, where: "Norðausturland", at: [-15.6, 65.55], off: [70, -46], side: "above" }],
+    ["i-blodberg", "Blóðberg", "Vegkanturinn", { q: "N", belt: 4, where: "Mývatnsöræfi", at: [-16.8, 65.5], off: [6, -124], side: "above" }]
   ]
 };
 
@@ -92,7 +100,7 @@ const ICONS = {
 };
 let SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>`;
 for (const id in ICONS) SPRITE += `<symbol id="${id}" viewBox="0 0 48 48">${ICONS[id]}</symbol>`;
-SPRITE += `</defs></svg>`;
+SPRITE += `{{LAND_DEFS}}</defs></svg>`;
 const ico = (id, cls) => {
   if (!ICONS[id]) throw new Error("unknown icon " + id);
   return `<svg class="ico${cls ? " " + cls : ""}" viewBox="0 0 48 48" aria-hidden="true"><use href="#${id}"/></svg>`;
@@ -129,13 +137,107 @@ SCENE += `<path class="base" d="M16 394H744"/>`;
 for (const [x, label] of [[70, "SJÓR"], [205, "FJARA"], [345, "AKUR"], [455, "HEIÐI"], [585, "FJALL"]]) SCENE += `<path class="base" d="M${x} 389V399"/><text x="${x}" y="414">${label}</text>`;
 SCENE += `</svg>`;
 
+// ---------- origin: the same land in plan view ----------
+// Sea lines step outward from the coast and land lines step inward toward the highlands, so the map
+// reads like the cross-section seen from above. The dashed lines are the four old quarters.
+const GEO = JSON.parse(read("src/geo/iceland.json"));
+const r1 = n => Math.round(n * 10) / 10;
+const GK = Math.cos(65 * Math.PI / 180), GS = GEO.W / ((GEO.lon1 - GEO.lon0) * GK);
+const pr = ([lon, lat]) => [r1((lon - GEO.lon0) * GK * GS), r1((GEO.lat1 - lat) * GS)];
+const geoLine = pts => "M" + pts.map(pr).map(p => p.join(" ")).join("L");
+const mid = (a, b) => [r1((a[0] + b[0]) / 2), r1((a[1] + b[1]) / 2)];
+const smooth = r => { // closed ring -> quadratic curves through the midpoints
+  const n = r.length; let d = "M" + mid(r[n - 1], r[0]).join(" ");
+  for (let i = 0; i < n; i++) d += "Q" + r[i].join(" ") + " " + mid(r[i], r[(i + 1) % n]).join(" ");
+  return d + "Z";
+};
+SPRITE = SPRITE.replace("{{LAND_DEFS}}", `<path id="land-s" d="${smooth(GEO.small)}"/><clipPath id="land-s-clip"><use href="#land-s"/></clipPath>`);
+const BELTS = ["Sjór", "Fjara", "Akur", "Heiði", "Fjall"];
+const QNAME = { V: "Vestur", N: "Norður", A: "Austur", S: "Suður" };
+// Schematic boundaries of the old landsfjórðungar: Hvítá in Borgarfjörður, Hrútafjörður, Langanes,
+// Jökulsá á Sólheimasandi, joined across the highlands.
+const J1 = [-20.4, 64.77], HOF = [-18.8, 64.82], J2 = [-17.9, 64.7];
+const HRUT = [[-21.1, 65.15], [-21.05, 65.7], [-20.9, 66.9]];
+const BORG = [[-21.95, 64.55], [-23.0, 64.45], [-26, 64.3]];
+const LANG = [[-15.3, 66.1], [-14.5, 66.4], [-13.0, 67]];
+const SOLH = [[-18.3, 64.35], [-19.15, 63.68], [-19.4, 63.5], [-19.5, 62.9]];
+const rev = a => [...a].reverse();
+const QUARTER = {
+  V: [J1, ...HRUT, [-26, 67], ...rev(BORG)],
+  N: [J1, HOF, J2, ...LANG, ...rev(HRUT)],
+  A: [J2, ...SOLH, [-12.5, 62.9], [-12.5, 67], ...rev(LANG)],
+  S: [J1, ...BORG, [-26, 62.9], ...rev(SOLH), J2, HOF]
+};
+const BOUNDS = [[J1, ...HRUT], [J1, ...BORG], [J2, ...LANG], [J2, ...SOLH], [J1, HOF, J2]];
+
+const originMap = ep => {
+  const u = (cls, w) => `<use href="#land" class="${cls}"${w ? ` stroke-width="${w}"` : ""}/>`;
+  let m = `<svg class="omap" viewBox="-100 -72 830 580" role="img" aria-label="Kort af Íslandi með gömlu fjórðungamörkunum og uppruna hráefna þáttarins">`;
+  m += `<defs><path id="land" d="${smooth(GEO.land)}"/><clipPath id="land-clip"><use href="#land"/></clipPath></defs>`;
+  for (const d of [30, 19, 9]) m += u("sea", 2 * d + 1.2) + u("erase", 2 * d - 1.2);
+  m += u("landfill") + `<g clip-path="url(#land-clip)">`;
+  for (const [d, c] of [[66, "r3"], [44, "r2"], [25, "r2"], [10, "r1"]]) m += u(c, 2 * d + 1.5) + u("erase", 2 * d - 1.5);
+  for (const b of BOUNDS) m += `<path class="bound" d="${geoLine(b)}"/>`;
+  m += `</g>` + u("coast");
+  for (const [x, y, t, a] of [[300, -52, "NORÐUR", "middle"], [300, 492, "SUÐUR", "middle"], [-92, 219, "VESTUR", "start"], [722, 219, "AUSTUR", "end"]]) m += `<text class="dir" x="${x}" y="${y}" text-anchor="${a}">${t}</text>`;
+  m += `<path class="tick" d="M300 -44v12M300 462v12M-28 215h-12M656 215h12"/>`;
+  const A = pr([-20.3, 63.42]), B = pr([-18.8, 64.8]);
+  m += `<path class="red" d="M${A[0]} ${A[1]}L${B[0]} ${B[1]}"/><circle class="knot on" cx="${A[0]}" cy="${A[1]}" r="5"/><circle class="knot" cx="${B[0]}" cy="${B[1]}" r="5"/>`;
+  m += `<text class="ab" x="${A[0] + 12}" y="${A[1] + 5}">A</text><text class="ab" x="${B[0] + 12}" y="${B[1] + 5}">B</text>`;
+  for (const [id, name, , o] of ep.larder) {
+    const [x, y] = pr(o.at), [dx, dy] = o.off, cx = r1(x + dx), cy = r1(y + dy), L = Math.hypot(dx, dy);
+    m += `<path class="lead" d="M${x} ${y}L${r1(cx - dx / L * 21)} ${r1(cy - dy / L * 21)}"/><circle class="pin" cx="${x}" cy="${y}" r="4.5"/>`;
+    m += `<circle class="badge" cx="${cx}" cy="${cy}" r="21"/><use class="pic" href="#${id}" x="${r1(cx - 15)}" y="${r1(cy - 15)}" width="30" height="30"/>`;
+    const [tx, ty, an] = o.side === "below" ? [cx, cy + 37, "middle"] : o.side === "above" ? [cx, cy - 28, "middle"] : o.side === "right" ? [cx + 28, cy + 4, "start"] : [cx - 28, cy + 4, "end"];
+    m += `<text class="nm" x="${tx}" y="${r1(ty)}" text-anchor="${an}">${name.toUpperCase()}</text>`;
+  }
+  return m + `</svg>`;
+};
+// The cross-section A–B: the front-page scene, flatter, with the five belts named.
+const profile = () => {
+  let v = `<svg class="profile" viewBox="0 0 760 250" role="img" aria-label="Þversnið A–B frá fjöru til fjalls">`;
+  v += wave(188, 8).replace("M0", "M30") + wave(200, 7).replace("M0", "M30") + wave(212, 5).replace("M0", "M30");
+  v += `<path class="c1" d="M300 196C380 178 440 166 500 138C552 114 590 84 628 62L646 76L662 66C690 96 722 110 760 116"/>`;
+  v += `<path class="c2" d="M420 212C480 196 530 176 580 148C612 130 634 112 650 104L664 114L678 108C704 130 730 140 760 144"/>`;
+  v += `<path class="t1" d="M150 184C210 182 256 174 310 160C380 142 430 128 486 100C540 73 574 44 612 22L634 42L650 28C676 62 716 84 760 92"/>`;
+  v += `<circle class="dot" cx="612" cy="22" r="5"/>`;
+  for (const [x, y, id] of [[52, 144, "i-scallop"], [198, 138, "i-sol"], [366, 100, "i-kartafla"], [520, 44, "i-lamb"], [660, 0, "i-blodberg"]]) v += `<use href="#${id}" x="${x}" y="${y}" width="36" height="36"/>`;
+  v += `<path class="base" d="M16 226H744"/>`;
+  [70, 215, 385, 540, 668].forEach((x, i) => { v += `<path class="base" d="M${x} 221V231"/><text x="${x}" y="246">${BELTS[i].toUpperCase()}</text>`; });
+  v += `<circle class="knot on" cx="16" cy="226" r="5"/><circle class="knot" cx="744" cy="226" r="5"/><text class="ab" x="10" y="212">A</text><text class="ab" x="738" y="212">B</text>`;
+  return v + `</svg>`;
+};
+// The mark: small map with the quarter shaded and a pin, plus five steps with the belt filled.
+const miniMap = o => {
+  const [x, y] = pr(o.at);
+  return `<svg class="mini" viewBox="-14 -12 628 456" aria-hidden="true"><g clip-path="url(#land-s-clip)"><path class="mfill" d="M-20 -20H640V470H-20Z"/><path class="mlit" d="${geoLine(QUARTER[o.q])}Z"/></g><use class="mcoast" href="#land-s"/><circle class="mpin" cx="${x}" cy="${y}" r="26"/></svg>`;
+};
+const ladder = belt => {
+  let l = `<svg class="ladder" viewBox="0 0 74 44" aria-hidden="true">`;
+  for (let i = 0; i < 5; i++) { const h = 8 + i * 8; l += `<rect${i === belt ? ' class="on"' : ""} x="${i * 15 + 1}" y="${43 - h}" width="11" height="${h}"/>`; }
+  return l + `</svg>`;
+};
+const rose = q => {
+  const R = 30, r = 10; let o = `<svg class="rose" viewBox="-40 -40 80 80" aria-hidden="true">`;
+  ["N", "A", "S", "V"].forEach((d, i) => {
+    const a0 = -135 + i * 90 + 4, a1 = -45 + i * 90 - 4; const [x0, y0] = pol(r, a0), [x1, y1] = pol(R, a0), [x2, y2] = pol(R, a1), [x3, y3] = pol(r, a1);
+    o += `<path${d === q ? ' class="on"' : ""} d="M${x0} ${y0}L${x1} ${y1}A${R} ${R} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 0 0 ${x0} ${y0}Z"/>`;
+  });
+  return o + `<path class="north" d="M0 -40v7"/></svg>`;
+};
+const mark = o => `<span class="mark" role="img" aria-label="Uppruni: ${QNAME[o.q]}, ${BELTS[o.belt].toLowerCase()}">${miniMap(o)}${ladder(o.belt)}</span><span class="label code">${QNAME[o.q]} · ${BELTS[o.belt]}</span>`;
+const origins = ep => ep.larder.map(([id, n, , o]) => `<li class="card origin">
+        <div class="origin-top">${ico(id)}<div><h3>${n}</h3><p class="small">${o.where}</p></div></div>
+        ${mark(o)}
+      </li>`).join("\n      ");
+
 // ---------- small pieces ----------
 const THREAD = `<svg class="thread" viewBox="0 0 1072 40" aria-hidden="true"><path d="M8 20C120 -8 250 48 373 20S620 -8 739 20S960 48 1064 22"/><circle class="on" cx="8" cy="20" r="7"/><circle cx="373" cy="20" r="7"/><circle cx="739" cy="20" r="7"/></svg>`;
 const poster = yt => `<img class="poster" src="https://i.ytimg.com/vi/${yt}/maxresdefault.jpg" data-fallback="https://i.ytimg.com/vi/${yt}/hqdefault.jpg" alt="" decoding="async"><span class="scrim"></span>`;
 const mmss = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
 const chapters = ep => ep.chapters.map(([s, id, title]) =>
   `<li><a class="t" href="https://youtu.be/${ep.yt}?t=${s}" data-t="${s}">${mmss(s)}</a><a class="textlink" href="#${id}">${title}</a></li>`).join("\n          ");
-const larder = ep => ep.larder.map(([id, n, place]) => `<li>${ico(id)}<span class="name">${n}</span><span class="small">${place}</span></li>`).join("");
+const larder = ep => ep.larder.map(([id, n, place, o]) => `<li>${ico(id)}<span class="name">${n}</span><span class="small">${place}</span>${mark(o)}</li>`).join("");
 const months = (from, to) => {
   let s = "";
   for (let i = from; i < to; i++) {
@@ -154,6 +256,7 @@ const PAGES = [
   { path: "/thaettir/", file: "thaettir.html", key: "ep", title: "Þættir – Frá fjöru til fjalls", desc: "Allir þættir hlaðvarpsins Frá fjöru til fjalls." },
   { path: "/thaettir/gormanudur/", file: "gormanudur.html", key: "ep", ep: EP1, title: "Gormánuður: ferðalagið hefst – Frá fjöru til fjalls", desc: "Í fyrsta þætti segja Þorvarður Goði og Karl Petersen frá því hvert ferðinni er heitið: fólkið á bak við matinn, gamla tímatalið og íslenskt hráefni." },
   { path: "/folkid/", file: "folkid.html", key: "folk", title: "Fólkið – Frá fjöru til fjalls", desc: "Gestgjafar hlaðvarpsins Frá fjöru til fjalls: Karl Petersen og Þorvarður Goði." },
+  { path: "/uppruni/", file: "uppruni.html", key: "upp", title: "Uppruni – Frá fjöru til fjalls", desc: "Hvaðan kemur maturinn? Áttin á landinu og hæðin yfir sjó: kort, snið og upprunamerki hráefnanna." },
   { path: "/almanak/", file: "almanak.html", key: "alm", title: "Matarárið – Frá fjöru til fjalls", desc: "Matarárið eftir gamla íslenska tímatalinu, mánuð fyrir mánuð." },
   { path: "/404.html", file: "404.html", key: "", title: "Síðan fannst ekki – Frá fjöru til fjalls", desc: "Síðan fannst ekki." }
 ];
@@ -169,6 +272,7 @@ function render(page) {
     "WHEEL:sm": wheel("sm"), "WHEEL:lg": wheel("lg"),
     POSTER: poster(ep.yt), YT: ep.yt,
     CHAPTERS: chapters(ep), LARDER: larder(ep),
+    MAP: originMap(ep), PROFILE: profile(), ORIGINS: origins(ep), "ROSE": rose("V"), "LADDER": ladder(1),
     "MONTHS:winter": months(0, 6), "MONTHS:summer": months(6, 12)
   });
   body = body.replace(/\{\{ICON:([a-z0-9-]+)(?: ([a-z0-9 -]+))?\}\}/g, (m, id, cls) => ico(id, cls));
@@ -178,7 +282,7 @@ function render(page) {
     TITLE: page.title, DESC: page.desc,
     CANONICAL: ORIGIN + BASE + (page.path === "/404.html" ? "/" : page.path),
     ROBOTS: INDEXABLE ? "index,follow" : "noindex,nofollow",
-    CUR_home: cur("home"), CUR_ep: cur("ep"), CUR_folk: cur("folk"), CUR_alm: cur("alm")
+    CUR_home: cur("home"), CUR_ep: cur("ep"), CUR_folk: cur("folk"), CUR_upp: cur("upp"), CUR_alm: cur("alm")
   });
   html = fill(html, { BASE });
   const left = html.match(/\{\{[A-Za-z_:0-9 -]+\}\}/);
