@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESC}}">
+<meta name="robots" content="{{ROBOTS}}">
+<link rel="canonical" href="{{CANONICAL}}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="is_IS">
+<meta property="og:site_name" content="Frá fjöru til fjalls">
+<meta property="og:title" content="{{TITLE}}">
+<meta property="og:description" content="{{DESC}}">
+<meta property="og:url" content="{{CANONICAL}}">
+<link rel="icon" type="image/svg+xml" href="{{FAVICON}}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Karla:wght@400;700&display=swap">
+<link rel="stylesheet" href="{{BASE}}/site.css?v={{V}}">
+</head>
+<body>
+{{SPRITE}}
+<div class="notice"><div class="wrap"><strong>Drög</strong>Texti bíður yfirferðar Karls Petersen. Myndir eru stillur úr þættinum þar til ljósmyndir berast.</div></div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="{{BASE}}/" aria-label="Frá fjöru til fjalls, forsíða">
+      <svg viewBox="0 0 200 200" aria-hidden="true" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <circle class="mark-ink" cx="100" cy="100" r="92"/>
+        <path class="mark-ink" d="M34 142 C54 134 66 150 86 142 S118 134 138 142 S160 150 166 142"/>
+        <path class="mark-moss" d="M40 108 C70 104 86 82 112 84 S150 110 162 104"/>
+        <path class="mark-ink" d="M62 74 L96 44 L112 60 L124 48 L142 70"/>
+        <circle class="mark-dot" cx="96" cy="44" r="5" stroke="none"/>
+      </svg>
+      <span class="brand-name">Frá fjöru til fjalls</span>
+    </a>
+    <nav class="nav" aria-label="Aðalvalmynd">
+      <a href="{{BASE}}/"{{CUR_home}}>Forsíða</a>
+      <a href="{{BASE}}/thaettir/"{{CUR_ep}}>Þættir</a>
+      <a href="{{BASE}}/folkid/"{{CUR_folk}}>Fólkið</a>
+      <a href="{{BASE}}/almanak/"{{CUR_alm}}>Almanak</a>
+    </nav>
+  </div>
+</header>
+<main>
+{{BODY}}
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="stack gap-1">
+      <p class="label">Framleiðsla: <a href="https://www.skjaskot.is/">Skjáskot</a></p>
+      <p class="small">Ritstjórnarstefna, eignarhald og samstarf fá sínar síður fyrir útgáfu.</p>
+    </div>
+    <p class="small">Drög, 23. nóvember 2026. Texti um 1. þátt er unninn upp úr samtalinu sjálfu og engu bætt við. Gervigreind raðar efninu, fólk samþykkir það.</p>
+  </div>
+</footer>
+<script src="{{BASE}}/site.js?v={{V}}" defer></script>
+</body>
+</html>

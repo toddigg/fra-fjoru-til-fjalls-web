@@ -1,0 +1,19 @@
+{
+  // Must match the Worker's name in the Cloudflare dashboard.
+  "name": "fra-fjoru-til-fjalls",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  // Runs before every deploy, locally and in Workers Builds.
+  "build": { "command": "node build.mjs" },
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+  // Going live on skjaskot.is is a separate, explicit step: add
+  //   "routes": [
+  //     { "pattern": "www.skjaskot.is/podcast*", "zone_name": "skjaskot.is" },
+  //     { "pattern": "skjaskot.is/podcast*", "zone_name": "skjaskot.is" }
+  //   ]
+  // and set INDEXABLE = true in build.mjs once the content is signed off.
+}

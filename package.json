@@ -1,0 +1,8 @@
+{
+  "name": "fra-fjoru-til-fjalls-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}
