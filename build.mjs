@@ -7,9 +7,8 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const BASE = "/podcast/fra-fjoru-til-fjalls";
 const ORIGIN = "https://www.skjaskot.is";
 const INDEXABLE = false; // flip to true at launch, after sign-off
-// The trial episode with Hinrik is not for official publication. Its page and every link to it
-// exist only while the site is in review; a launch build (INDEXABLE) leaves them out.
-const SHOW_PILOT = !INDEXABLE;
+// The trial episode with Hinrik is not for official publication: it is marked reviewOnly in the
+// episode register, so a launch build (INDEXABLE) leaves out its page and every link to it.
 const VERSION = Date.now().toString(36);
 
 const read = p => readFileSync(join(ROOT, p), "utf8");
@@ -71,15 +70,43 @@ const PILOT = {
   ]
 };
 
+// ---------- the episode register: the one place an episode is entered ----------
+// Every page that mentions an episode is drawn from this list: the front page, the episode list,
+// the almanac, the people page, the origin page and the "other episodes" block on each episode
+// page. checkSite() at the end of the build refuses to write a site where one of them is missing.
+// Order is release order. Adding an episode: see "Nýr þáttur" in the README.
+//   n          episode number, null for an extra such as the trial episode
+//   reviewOnly built only while the site is in review (INDEXABLE false), never in a launch build
+//   who        what the front-page card says when there is no guest
+const EPISODES = [
+  { ...EP1, slug: "gormanudur", file: "gormanudur.html", n: 1, month: 0,
+    tag: "1. þáttur", stamp: "Þáttur 1", open: "Opna 1. þátt", watch: "Horfa á 1. þátt", back: "Aftur í 1. þátt",
+    title: "Gormánuður: ferðalagið hefst", short: "Ferðalagið hefst", length: "Um 35 mín.", cta: "Horfa og lesa",
+    frame: { seed: 5, lines: 4, from: 0.52 },
+    blurb: "Þorvarður Goði og Kalli setjast tveir við borðið og segja hvert ferðinni er heitið: fólkið á bak við matinn, gamla tímatalið og leitin að leynistað hvers gests.",
+    desc: "Í fyrsta þætti segja Þorvarður Goði og Karl Petersen frá því hvert ferðinni er heitið: fólkið á bak við matinn, gamla tímatalið og íslenskt hráefni.",
+    who: { head: "Gestgjafarnir tveir", sub: "Karl Petersen og Þorvarður Goði", href: "/folkid/" }, guests: [] },
+  { ...PILOT, slug: "hinrik", file: "hinrik.html", n: null, month: 0, reviewOnly: true,
+    tag: "Tilraunaþáttur", stamp: "Tilraunaþáttur", open: "Opna tilraunaþáttinn", watch: "Lesa um tilraunaþáttinn", back: "Aftur í tilraunaþáttinn",
+    title: "Tilraunaþáttur: sagan á diskinum", short: "Sagan á diskinum", length: "Ekki kominn út", cta: "Lesa",
+    frame: { seed: 23, lines: 5, from: 0.44 },
+    blurb: "Hinrik Carl Ellertsson matreiðslukennari er fyrsti gesturinn við borðið, í tilraun sem tekin var upp á undan 1. þætti: leiðin í eldhúsið, kartaflan, hundasúran og hvers vegna skyr er það eina sem kalla má íslenskt.",
+    desc: "Tilraunaþáttur með Hinriki Carli Ellertssyni matreiðslukennara: leiðin í eldhúsið, kartaflan, hundasúran og hvers vegna skyr er það eina sem kalla má íslenskt.",
+    guests: [{ name: "Hinrik Carl Ellertsson", role: "Matreiðslukennari í MK", status: "Bíður samþykkis gests" }] }
+];
+const SHOWN = EPISODES.filter(e => !(e.reviewOnly && INDEXABLE));
+const LATEST = [...SHOWN].reverse().find(e => e.yt) || SHOWN[0];            // the newest episode that is out
+const ORIGIN_EP = SHOWN.find(e => e.larder.some(l => l[3])) || LATEST;     // the episode whose origins the map shows
+const HOST_STILLS = EP1.yt;                                                 // the hosts' portraits are stills from episode 1
+const epHref = e => `${BASE}/thaettir/${e.slug}/`;
+
 // ---------- the old calendar ----------
 const MONTHS = ["Gormánuður", "Ýlir", "Mörsugur", "Þorri", "Góa", "Einmánuður", "Harpa", "Skerpla", "Sólmánuður", "Heyannir", "Tvímánuður", "Haustmánuður"];
 const PERIODS = ["okt. – nóv.", "nóv. – des.", "des. – jan.", "jan. – feb.", "feb. – mars", "mars – apríl", "apríl – maí", "maí – júní", "júní – júlí", "júlí – ágúst", "ágúst – sept.", "sept. – okt."];
 // month index -> episodes recorded in that month
 const MONTH_NOTES = { 0: "sláturtíð" };
-const MONTH_EPISODES = { 0: [
-  { label: "1. þáttur", href: "/thaettir/gormanudur/" },
-  ...(SHOW_PILOT ? [{ label: "Tilraunaþáttur", href: "/thaettir/hinrik/" }] : [])
-] };
+const MONTH_EPISODES = {};
+for (const e of SHOWN) (MONTH_EPISODES[e.month] ||= []).push({ label: e.tag, href: `/thaettir/${e.slug}/` });
 
 // ---------- icons (48 x 48, single-weight line) ----------
 const fish = P("M5 24C12 14 27 13 35 24C27 35 12 34 5 24Z") + P("M35 24L44 16V32Z") + `<circle cx="13" cy="22" r="1"/>` + P("M19 18.5q3.5 5.5 0 11");
@@ -150,14 +177,14 @@ const wheel = (cls) => {
   for (let i = 0; i < 12; i++) {
     const a0 = -90 + i * 30 + gap / 2, a1 = -90 + (i + 1) * 30 - gap / 2;
     const [x0, y0] = pol(r, a0), [x1, y1] = pol(R, a0), [x2, y2] = pol(R, a1), [x3, y3] = pol(r, a1);
-    s += `<path class="w${i > 5 ? " s" : ""}${i === 0 ? " on" : ""}" d="M${x0} ${y0}L${x1} ${y1}A${R} ${R} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 0 0 ${x0} ${y0}Z"/>`;
+    s += `<path class="w${i > 5 ? " s" : ""}${i === LATEST.month ? " on" : ""}" d="M${x0} ${y0}L${x1} ${y1}A${R} ${R} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r} ${r} 0 0 0 ${x0} ${y0}Z"/>`;
     if (labels) {
       const am = -90 + i * 30 + 15; const [lx, ly] = pol(R + 14, am); const c = Math.cos(am * Math.PI / 180);
-      s += `<text x="${lx}" y="${rnd(ly + 4)}" text-anchor="${c > 0.05 ? "start" : c < -0.05 ? "end" : "middle"}"${i === 0 ? ' class="on"' : ""}>${MONTHS[i]}</text>`;
+      s += `<text x="${lx}" y="${rnd(ly + 4)}" text-anchor="${c > 0.05 ? "start" : c < -0.05 ? "end" : "middle"}"${i === LATEST.month ? ' class="on"' : ""}>${MONTHS[i]}</text>`;
     }
   }
-  s += `<use href="#m-1" x="-18" y="-18" width="36" height="36"/>`;
-  return `<svg class="wheel ${cls}" viewBox="${labels ? "-205 -130 410 260" : "-98 -98 196 196"}" role="img" aria-label="Matarárið: tólf mánuðir, gormánuður merktur">${s}</svg>`;
+  s += `<use href="#m-${LATEST.month + 1}" x="-18" y="-18" width="36" height="36"/>`;
+  return `<svg class="wheel ${cls}" viewBox="${labels ? "-205 -130 410 260" : "-98 -98 196 196"}" role="img" aria-label="Matarárið: tólf mánuðir, ${MONTHS[LATEST.month].toLowerCase()} merktur">${s}</svg>`;
 };
 
 // ---------- front page scene: the land in cross-section, shore to summit ----------
@@ -221,7 +248,7 @@ const originMap = ep => {
   const A = pr([-20.3, 63.42]), B = pr([-18.8, 64.8]);
   m += `<path class="red" d="M${A[0]} ${A[1]}L${B[0]} ${B[1]}"/><circle class="knot on" cx="${A[0]}" cy="${A[1]}" r="5"/><circle class="knot" cx="${B[0]}" cy="${B[1]}" r="5"/>`;
   m += `<text class="ab" x="${A[0] + 12}" y="${A[1] + 5}">A</text><text class="ab" x="${B[0] + 12}" y="${B[1] + 5}">B</text>`;
-  for (const [id, name, , o] of ep.larder) {
+  for (const [id, name, , o] of ep.larder.filter(l => l[3])) {
     const [x, y] = pr(o.at), [dx, dy] = o.off, cx = r1(x + dx), cy = r1(y + dy), L = Math.hypot(dx, dy);
     m += `<path class="lead" d="M${x} ${y}L${r1(cx - dx / L * 21)} ${r1(cy - dy / L * 21)}"/><circle class="pin" cx="${x}" cy="${y}" r="4.5"/>`;
     m += `<circle class="badge" cx="${cx}" cy="${cy}" r="21"/><use class="pic" href="#${id}" x="${r1(cx - 15)}" y="${r1(cy - 15)}" width="30" height="30"/>`;
@@ -263,7 +290,7 @@ const rose = q => {
   return o + `<path class="north" d="M0 -40v7"/></svg>`;
 };
 const mark = o => `<span class="mark" role="img" aria-label="Uppruni: ${QNAME[o.q]}, ${BELTS[o.belt].toLowerCase()}">${miniMap(o)}${ladder(o.belt)}</span><span class="label code">${QNAME[o.q]} · ${BELTS[o.belt]}</span>`;
-const origins = ep => ep.larder.map(([id, n, , o]) => `<li class="card origin">
+const origins = ep => ep.larder.filter(l => l[3]).map(([id, n, , o]) => `<li class="card origin">
         <div class="origin-top">${ico(id)}<div><h3>${n}</h3><p class="small">${o.where}</p></div></div>
         ${mark(o)}
       </li>`).join("\n      ");
@@ -290,55 +317,92 @@ const months = (from, to) => {
   }
   return s;
 };
-const PILOT_CARD = !SHOW_PILOT ? "" : `<section class="section">
-    <div class="two">
-      <a class="frame r16x9 film" href="${BASE}/thaettir/hinrik/" aria-label="Opna tilraunaþáttinn">
-        <canvas class="contours" data-seed="23" data-lines="5" data-from="0.44" aria-hidden="true"></canvas>
+// ---------- blocks drawn from the episode register ----------
+const epCard = (e, label) => `<div class="two">
+      <a class="frame r16x9 film" href="${epHref(e)}" aria-label="${e.open}">
+        <canvas class="contours" data-seed="${e.frame.seed}" data-lines="${e.frame.lines}" data-from="${e.frame.from}" aria-hidden="true"></canvas>${poster(e.yt)}
         <span class="frame-words">
-          <span class="label stamp"><i></i>Tilraunaþáttur · Gormánuður</span>
-          <span class="title">Sagan á diskinum</span>
+          <span class="label stamp"><i></i>${e.stamp} · ${MONTHS[e.month]}</span>
+          <span class="title">${e.short}</span>
         </span>
       </a>
       <div class="stack gap-2">
-        <p class="label stamp"><i></i>Tilraunaþáttur · Gormánuður · Ekki kominn út</p>
-        <h2><a href="${BASE}/thaettir/hinrik/">Tilraunaþáttur: sagan á diskinum</a></h2>
-        <p>Hinrik Carl Ellertsson matreiðslukennari er fyrsti gesturinn við borðið, í tilraun sem tekin var upp á undan 1. þætti: leiðin í eldhúsið, kartaflan, hundasúran og hvers vegna skyr er það eina sem kalla má íslenskt.</p>
-        <p><a class="textlink" href="${BASE}/thaettir/hinrik/">Lesa</a></p>
+        ${label}
+        <h2><a href="${epHref(e)}">${e.title}</a></h2>
+        <p>${e.blurb}</p>
+        <p><a class="textlink" href="${epHref(e)}">${e.cta}</a></p>
       </div>
-    </div>
-  </section>`;
+    </div>`;
+const EP_LIST = SHOWN.map(e => `<section class="section">
+    ${epCard(e, `<p class="label stamp"><i></i>${e.tag} · ${MONTHS[e.month]} · ${e.length}</p>`)}
+  </section>`).join("\n  ");
+const LATEST_CARD = epCard(LATEST, `<p class="label" id="h-nyjast">Nýjasti þátturinn</p>`);
+// Front page: the two newest episodes by who sits at the table, then what comes next.
+const HOME_CARDS = (() => {
+  const cards = SHOWN.slice(-2).map(e => e.guests.length
+    ? `<div class="card"><p class="label">${e.tag}</p><h3><a href="${epHref(e)}">${e.guests.map(g => g.name).join(" og ")}</a></h3><p class="muted">${e.guests[0].role}</p></div>`
+    : `<div class="card"><p class="label">${e.tag}</p><h3><a href="${BASE}${e.who.href}">${e.who.head}</a></h3><p class="muted">${e.who.sub}</p></div>`);
+  let next = Math.max(0, ...SHOWN.map(e => e.n || 0)) + 1;
+  const guestOut = SHOWN.some(e => e.n && e.guests.length);
+  const teasers = [[guestOut ? "Næsti gestur" : "Fyrsti gesturinn", "Áskrifendur fréttabréfsins fá vísbendinguna fyrst."], ["Sá sem gesturinn mælir með", "Hver gestur bendir á þann næsta."]];
+  while (cards.length < 3) { const [h, p] = teasers.shift(); cards.push(`<div class="card empty"><p class="label">${next++}. þáttur</p><h3>${h}</h3><p>${p}</p></div>`); }
+  return cards.join("\n      ");
+})();
+const FOLK_EPISODES = SHOWN.map(e => `<div class="card">
+          <p class="label stamp"><i></i>${e.tag} · ${MONTHS[e.month]}</p>
+          <h3><a href="${epHref(e)}">${e.title}</a></h3>
+          <p><a class="textlink" href="${epHref(e)}">${e.cta}</a></p>
+        </div>`).join("\n        ");
+const GUESTS = SHOWN.flatMap(e => e.guests.map(g => `<div class="card">
+          <p class="label stamp"><i></i>${e.tag} · ${MONTHS[e.month]}</p>
+          <h3><a href="${epHref(e)}">${g.name}</a></h3>
+          <p class="muted">${g.role}</p>
+          ${g.status ? `<div><span class="status">${g.status}</span></div>` : ""}
+        </div>`)).join("\n        ");
+const otherEpisodes = ep => {
+  const rest = SHOWN.filter(e => e !== ep);
+  return !rest.length ? "" : `<div class="aside-block">
+        <p class="label">Aðrir þættir</p>
+        ${rest.map(e => `<p><a class="textlink" href="${epHref(e)}">${e.title}</a><br><span class="muted">${e.tag} · ${MONTHS[e.month]}</span></p>`).join("\n        ")}
+      </div>`;
+};
+const IS_MONTHS = ["janúar", "febrúar", "mars", "apríl", "maí", "júní", "júlí", "ágúst", "september", "október", "nóvember", "desember"];
+const TODAY = new Date();
+const BUILD_DATE = `${TODAY.getUTCDate()}. ${IS_MONTHS[TODAY.getUTCMonth()]} ${TODAY.getUTCFullYear()}`;
 const FAVICON = "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'><circle cx='100' cy='100' r='96' fill='#ece7d8'/><circle cx='100' cy='100' r='88' stroke='#16302a'/><path stroke='#16302a' d='M34 142C54 134 66 150 86 142S118 134 138 142S160 150 166 142'/><path stroke='#6f8a52' d='M40 108C70 104 86 82 112 84S150 110 162 104'/><path stroke='#16302a' d='M62 74L96 44L112 60L124 48L142 70'/><circle cx='96' cy='44' r='9' fill='#b5562b'/></svg>`);
 
 // ---------- pages ----------
 const PAGES = [
   { path: "/", file: "home.html", key: "home", title: "Frá fjöru til fjalls", desc: "Hlaðvarp um fólkið á bak við íslenskan mat. Karl Petersen og Þorvarður Goði bjóða því að borðinu, einum gesti í senn." },
   { path: "/thaettir/", file: "thaettir.html", key: "ep", title: "Þættir – Frá fjöru til fjalls", desc: "Allir þættir hlaðvarpsins Frá fjöru til fjalls." },
-  { path: "/thaettir/gormanudur/", file: "gormanudur.html", key: "ep", ep: EP1, title: "Gormánuður: ferðalagið hefst – Frá fjöru til fjalls", desc: "Í fyrsta þætti segja Þorvarður Goði og Karl Petersen frá því hvert ferðinni er heitið: fólkið á bak við matinn, gamla tímatalið og íslenskt hráefni." },
-  SHOW_PILOT && { path: "/thaettir/hinrik/", file: "hinrik.html", key: "ep", ep: PILOT, title: "Tilraunaþáttur: sagan á diskinum – Frá fjöru til fjalls", desc: "Tilraunaþáttur með Hinriki Carli Ellertssyni matreiðslukennara: leiðin í eldhúsið, kartaflan, hundasúran og hvers vegna skyr er það eina sem kalla má íslenskt." },
+  ...SHOWN.map(e => ({ path: `/thaettir/${e.slug}/`, file: e.file, key: "ep", ep: e, title: `${e.title} – Frá fjöru til fjalls`, desc: e.desc })),
   { path: "/folkid/", file: "folkid.html", key: "folk", title: "Fólkið – Frá fjöru til fjalls", desc: "Gestgjafar hlaðvarpsins Frá fjöru til fjalls: Karl Petersen og Þorvarður Goði." },
   { path: "/uppruni/", file: "uppruni.html", key: "upp", title: "Uppruni – Frá fjöru til fjalls", desc: "Hvaðan kemur maturinn? Áttin á landinu og hæðin yfir sjó: kort, snið og upprunamerki hráefnanna." },
   { path: "/almanak/", file: "almanak.html", key: "alm", title: "Matarárið – Frá fjöru til fjalls", desc: "Matarárið eftir gamla íslenska tímatalinu, mánuð fyrir mánuð." },
   { path: "/404.html", file: "404.html", key: "", title: "Síðan fannst ekki – Frá fjöru til fjalls", desc: "Síðan fannst ekki." }
-].filter(Boolean);
+];
 
 const shell = read("src/shell.html");
 const fill = (s, map) => { for (const k in map) s = s.split("{{" + k + "}}").join(map[k]); return s; };
 
 function render(page) {
-  const ep = page.ep || EP1;
+  const ep = page.ep || LATEST;
   let body = read("src/pages/" + page.file);
   body = fill(body, {
-    SCENE, THREAD, PILOT_CARD,
+    SCENE, THREAD, EP_LIST, LATEST_CARD, HOME_CARDS, FOLK_EPISODES, GUESTS,
+    OTHER_EPISODES: otherEpisodes(page.ep), HOST_STILLS,
+    LATEST_HREF: epHref(LATEST), LATEST_WATCH: LATEST.watch,
+    ORIGIN_EP_LABEL: `${ORIGIN_EP.tag} · ${MONTHS[ORIGIN_EP.month]}`, ORIGIN_EP_HREF: epHref(ORIGIN_EP), ORIGIN_EP_BACK: ORIGIN_EP.back,
     "WHEEL:sm": wheel("sm"), "WHEEL:lg": wheel("lg"),
     POSTER: poster(ep.yt), YT: ep.yt || "",
     CHAPTERS: chapters(ep), LARDER: larder(ep),
-    MAP: originMap(EP1), PROFILE: profile(), ORIGINS: origins(EP1), "ROSE": rose("V"), "LADDER": ladder(1),
+    MAP: originMap(ORIGIN_EP), PROFILE: profile(), ORIGINS: origins(ORIGIN_EP), "ROSE": rose("V"), "LADDER": ladder(1),
     "MONTHS:winter": months(0, 6), "MONTHS:summer": months(6, 12)
   });
   body = body.replace(/\{\{ICON:([a-z0-9-]+)(?: ([a-z0-9 -]+))?\}\}/g, (m, id, cls) => ico(id, cls));
   const cur = k => (page.key === k ? ' aria-current="page"' : "");
   let html = fill(shell, {
-    BODY: body, SPRITE, FAVICON, V: VERSION,
+    BODY: body, SPRITE, FAVICON, V: VERSION, BUILD_DATE,
     TITLE: page.title, DESC: page.desc,
     CANONICAL: ORIGIN + BASE + (page.path === "/404.html" ? "/" : page.path),
     ROBOTS: INDEXABLE ? "index,follow" : "noindex,nofollow",
@@ -356,12 +420,48 @@ const OUT = join(DIST, BASE);
 rmSync(DIST, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 if (existsSync(join(ROOT, "public"))) cpSync(join(ROOT, "public"), OUT, { recursive: true });
+const BUILT = {};
+for (const page of PAGES) BUILT[page.path] = render(page);
+
+// ---------- consistency check: an episode is on every page that should carry it, or the build fails ----------
+function checkSite() {
+  const err = [];
+  const need = ["slug", "file", "tag", "stamp", "open", "watch", "back", "title", "short", "length", "cta", "blurb", "desc", "frame", "chapters", "larder", "guests"];
+  for (const e of EPISODES) {
+    for (const k of need) if (e[k] === undefined || e[k] === "") err.push(`${e.slug || "?"}: vantar "${k}" í þáttaskrána`);
+    if (!e.guests?.length && !e.who) err.push(`${e.slug}: hvorki gestur né "who" fyrir forsíðuspjaldið`);
+    if (!(e.month >= 0 && e.month < 12)) err.push(`${e.slug}: mánuður utan 0–11`);
+    else if (e.month !== 0) err.push(`${e.slug}: ${MONTHS[e.month]} á engan lit enn. --month í site.css er fastur á gormánuði; bættu við lit mánaðarins áður en þátturinn fer inn`);
+    if (EPISODES.filter(x => x.slug === e.slug).length > 1) err.push(`${e.slug}: slóðin er tvítekin`);
+  }
+  const link = e => `${BASE}/thaettir/${e.slug}/"`;
+  const everywhere = [["/thaettir/", "þáttalistann"], ["/almanak/", "almanakið"], ["/folkid/", "Fólkið"]];
+  for (const e of SHOWN) {
+    const own = BUILT[`/thaettir/${e.slug}/`];
+    if (!own) { err.push(`${e.slug}: síðan var ekki byggð`); continue; }
+    for (const [, id, title] of e.chapters) if (!own.includes(`id="${id}"`)) err.push(`${e.slug}: kaflinn "${title}" (#${id}) er ekki í texta síðunnar`);
+    for (const [path, name] of everywhere) if (!BUILT[path].includes(link(e))) err.push(`${e.slug}: vantar í ${name} (${path})`);
+    for (const o of SHOWN) if (o !== e && !BUILT[`/thaettir/${o.slug}/`]?.includes(link(e))) err.push(`${e.slug}: vantar í „Aðrir þættir“ á síðu ${o.slug}`);
+    for (const g of e.guests) if (!BUILT["/folkid/"].includes(g.name)) err.push(`${e.slug}: gesturinn ${g.name} er ekki á Fólkið`);
+  }
+  if (!BUILT["/"].includes(link(LATEST))) err.push(`forsíðan vísar ekki á nýjasta þáttinn (${LATEST.slug})`);
+  for (const e of SHOWN.slice(-2)) if (!BUILT["/"].includes(e.tag)) err.push(`${e.slug}: vantar á forsíðuspjöldin`);
+  for (const e of EPISODES.filter(e => !SHOWN.includes(e)))
+    for (const path in BUILT) {
+      if (BUILT[path].includes(`/thaettir/${e.slug}/`)) err.push(`${e.slug}: á ekki að sjást í útgáfu en er á ${path}`);
+      for (const g of e.guests) if (BUILT[path].includes(g.name)) err.push(`${e.slug}: nafn gestsins ${g.name} er á ${path} í útgáfu`);
+    }
+  if (err.length) throw new Error("Samræmisathugun féll:\n  - " + err.join("\n  - "));
+  return `${SHOWN.length} ${SHOWN.length === 1 ? "þáttur" : "þættir"} á ${Object.keys(BUILT).length} síðum`;
+}
+const CHECK = checkSite();
+
 for (const page of PAGES) {
   const file = page.path.endsWith("/") ? join(OUT, page.path, "index.html") : join(OUT, page.path);
   mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, render(page));
+  writeFileSync(file, BUILT[page.path]);
 }
-writeFileSync(join(DIST, "404.html"), render(PAGES[PAGES.length - 1]));
+writeFileSync(join(DIST, "404.html"), BUILT["/404.html"]);
 writeFileSync(join(OUT, "site.css"), read("src/site.css"));
 writeFileSync(join(OUT, "site.js"), read("src/site.js"));
 writeFileSync(join(DIST, "_redirects"), [
@@ -375,4 +475,4 @@ writeFileSync(join(DIST, "_headers"), [
   "  X-Content-Type-Options: nosniff",
   "  Referrer-Policy: strict-origin-when-cross-origin"
 ].join("\n") + "\n");
-console.log(`built ${PAGES.length} pages -> dist${BASE}/ (version ${VERSION}, indexable: ${INDEXABLE})`);
+console.log(`built ${PAGES.length} pages -> dist${BASE}/ (version ${VERSION}, indexable: ${INDEXABLE})\nsamræmi: ${CHECK}`);

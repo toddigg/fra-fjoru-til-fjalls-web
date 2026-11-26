@@ -10,7 +10,7 @@
       <div class="person">
         <div class="frame r4x5 film">
           <canvas class="contours" data-seed="11" data-lines="5" data-from="0.1" aria-hidden="true"></canvas>
-          <img class="poster" src="https://i.ytimg.com/vi/{{YT}}/maxres3.jpg" alt="Karl Petersen í 1. þætti" style="object-position:25% 50%" decoding="async">
+          <img class="poster" src="https://i.ytimg.com/vi/{{HOST_STILLS}}/maxres3.jpg" alt="Karl Petersen í 1. þætti" style="object-position:25% 50%" decoding="async">
         </div>
         <div class="stack gap-2">
           <h2>Karl Petersen</h2>
@@ -26,7 +26,7 @@
       <div class="person">
         <div class="frame r4x5 film">
           <canvas class="contours" data-seed="17" data-lines="5" data-from="0.1" aria-hidden="true"></canvas>
-          <img class="poster" src="https://i.ytimg.com/vi/{{YT}}/maxres1.jpg" alt="Þorvarður Goði í 1. þætti" style="object-position:72% 50%" decoding="async">
+          <img class="poster" src="https://i.ytimg.com/vi/{{HOST_STILLS}}/maxres1.jpg" alt="Þorvarður Goði í 1. þætti" style="object-position:72% 50%" decoding="async">
         </div>
         <div class="stack gap-2">
           <h2>Þorvarður Goði</h2>
@@ -45,14 +45,11 @@
     <div class="two">
       <div class="stack gap-2">
         <p class="label">Koma fram í</p>
-        <div class="card">
-          <p class="label stamp"><i></i>1. þáttur · Gormánuður</p>
-          <h3><a href="{{BASE}}/thaettir/gormanudur/">Gormánuður: ferðalagið hefst</a></h3>
-          <p><a class="textlink" href="{{BASE}}/thaettir/gormanudur/">Horfa og lesa</a></p>
-        </div>
+        {{FOLK_EPISODES}}
       </div>
       <div class="stack gap-2">
         <p class="label">Gestir</p>
+        {{GUESTS}}
         <p style="max-width:52ch">Hver gestur fær sína síðu þegar þátturinn hans hefur verið tekinn upp og hann hefur samþykkt textann.</p>
       </div>
     </div>

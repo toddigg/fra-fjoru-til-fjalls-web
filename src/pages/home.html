@@ -6,27 +6,13 @@
       <h1>Á bak við allan góðan mat á Íslandi er fólk</h1>
       <div class="rule"></div>
       <p class="lead">Karl Petersen kokkur og Þorvarður Goði, maður sem finnst gott að borða, bjóða því að borðinu, einum gesti í senn.</p>
-      <div><a class="btn" href="{{BASE}}/thaettir/gormanudur/">Horfa á 1. þátt</a></div>
+      <div><a class="btn" href="{{LATEST_HREF}}">{{LATEST_WATCH}}</a></div>
     </div>
   </div>
 </div>
 <div class="wrap">
   <section class="section" aria-labelledby="h-nyjast">
-    <div class="two">
-      <a class="frame r16x9 film" href="{{BASE}}/thaettir/gormanudur/" aria-label="Opna 1. þátt">
-        <canvas class="contours" data-seed="5" data-lines="4" data-from="0.52" aria-hidden="true"></canvas>{{POSTER}}
-        <span class="frame-words">
-          <span class="label stamp"><i></i>Þáttur 1 · Gormánuður</span>
-          <span class="title">Ferðalagið hefst</span>
-        </span>
-      </a>
-      <div class="stack gap-2">
-        <p class="label" id="h-nyjast">Nýjasti þátturinn</p>
-        <h2><a href="{{BASE}}/thaettir/gormanudur/">Gormánuður: ferðalagið hefst</a></h2>
-        <p>Þorvarður Goði og Kalli setjast tveir við borðið og segja hvert ferðinni er heitið: fólkið á bak við matinn, gamla tímatalið og leitin að leynistað hvers gests.</p>
-        <p><a class="textlink" href="{{BASE}}/thaettir/gormanudur/">Horfa og lesa</a></p>
-      </div>
-    </div>
+    {{LATEST_CARD}}
   </section>
   <section class="section stack gap-4" aria-labelledby="h-folk">
     <div class="stack gap-1">
@@ -35,21 +21,7 @@
     </div>
     {{THREAD}}
     <div class="three">
-      <div class="card">
-        <p class="label">1. þáttur</p>
-        <h3><a href="{{BASE}}/folkid/">Gestgjafarnir tveir</a></h3>
-        <p class="muted">Karl Petersen og Þorvarður Goði</p>
-      </div>
-      <div class="card empty">
-        <p class="label">2. þáttur</p>
-        <h3>Fyrsti gesturinn</h3>
-        <p>Áskrifendur fréttabréfsins fá vísbendinguna fyrst.</p>
-      </div>
-      <div class="card empty">
-        <p class="label">3. þáttur</p>
-        <h3>Sá sem gesturinn mælir með</h3>
-        <p>Hver gestur bendir á þann næsta.</p>
-      </div>
+      {{HOME_CARDS}}
     </div>
   </section>
   <section class="section" aria-labelledby="h-alm">
