@@ -1,23 +1,24 @@
 <div class="wrap">
   <div class="ep-head stack gap-3">
     <div class="frame r16x9 film">
-      <canvas class="contours" data-seed="23" data-lines="5" data-from="0.44" aria-hidden="true"></canvas>
+      <canvas class="contours" data-seed="23" data-lines="5" data-from="0.44" aria-hidden="true"></canvas>{{POSTER}}
       <div class="frame-words">
         <span class="label stamp"><i></i>Tilraunaþáttur · Gormánuður</span>
         <span class="title">Sagan á diskinum</span>
         <span class="rule"></span>
       </div>
-      <p class="frame-note solo">Tilraunaþáttur, ekki ætlaður til opinberrar birtingar. Myndbandið kemur hér þegar þátturinn hefur verið klipptur.</p>
+      <p class="frame-note" id="play-note">Myndbandið spilast hér, frá YouTube.</p>
+      <a class="play" id="play-btn" href="https://youtu.be/{{YT}}" data-yt="{{YT}}">Spila</a>
     </div>
     <div class="stack gap-2">
-      <p class="label stamp"><i></i>Tilraunaþáttur · Gormánuður · Vetur 2026–27 · Um tvær klst. óklipptur</p>
+      <p class="label stamp"><i></i>Tilraunaþáttur · Gormánuður · Vetur 2026–27 · Um 60 mín.</p>
       <h1>Tilraunaþáttur: sagan á diskinum</h1>
       <p class="muted">Gestur: Hinrik Carl Ellertsson, matreiðslukennari í MK · Gestgjafar: Karl Petersen og Þorvarður Goði</p>
       <div class="listen">
-        <button class="btn quiet" type="button" disabled>YouTube</button>
+        <a class="btn quiet" href="https://youtu.be/{{YT}}">YouTube</a>
         <button class="btn quiet" type="button" disabled>Spotify</button>
         <button class="btn quiet" type="button" disabled>Apple Podcasts</button>
-        <span class="small">Þátturinn er ekki kominn út.</span>
+        <span class="small">Tilraunaþáttur, ekki ætlaður til opinberrar birtingar.</span>
       </div>
       <div><span class="status">Bíður yfirferðar Hinriks og Karls Petersen</span></div>
     </div>
@@ -28,7 +29,7 @@
       <p class="lede">Áður en þátturinn fór formlega af stað settust Kalli og Þorvarður Goði niður með Hinriki Carli Ellertssyni til að prófa hugmyndina. Úr varð tveggja tíma samtal um leiðina í eldhúsið, veruleikann á bak við glansmyndina og hvað megi í raun kalla íslenskan mat.</p>
       <dl class="facts">
         <dt>Gestur</dt><dd>Hinrik Carl Ellertsson, matreiðslumaður sem hefur kennt í MK frá 2019.</dd>
-        <dt>Tekið upp</dt><dd>30. október 2026, sem tilraun, þremur vikum á undan 1. þætti.</dd>
+        <dt>Tekið upp</dt><dd>30. október 2026, sem tilraun, þremur vikum á undan 1. þætti. Klippti þátturinn er um klukkustund.</dd>
         <dt>Um hvað</dt><dd>Leiðina í eldhúsið, kennsluna og hráefnið: kartöflur, hundasúru og skyr.</dd>
       </dl>
 
@@ -99,7 +100,7 @@
         <ol class="chapters long">
           {{CHAPTERS}}
         </ol>
-        <p class="small">Heitið stekkur í textann. Tímarnir eiga við yfirferðarklipp 3 og breytast þegar þátturinn verður klipptur.</p>
+        <p class="small">Tíminn stekkur í myndbandið, heitið í textann. Tímakóðar eiga við klippið sem er á YouTube.</p>
       </div>
       <div class="aside-block month-block">
         <p class="label stamp"><i></i>Mánuðurinn</p>

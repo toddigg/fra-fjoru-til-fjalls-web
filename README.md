@@ -23,8 +23,8 @@ Vefur hlaðvarpsins *Frá fjöru til fjalls* (Skjáskot). Kyrrstæðar síður, 
 Þáttur er skráður á einum stað, í `EPISODES` í `build.mjs`. Forsíðan, þáttalistinn, almanakið, Fólkið, Uppruni og „Aðrir þættir“ á hverri þáttasíðu eru teiknuð upp úr þeirri skrá. Það á aldrei að handskrifa heiti, númer eða slóð þáttar inn í aðra síðu.
 
 1. **Efnið.** Afrit úr Hreimi, yfirfarið. Texti síðunnar er unninn upp úr samtalinu sjálfu og engu bætt við. Beinar tilvitnanir eru orðréttar úr afritinu.
-2. **Síðan.** Ný skrá í `src/pages/`, byggð á `gormanudur.html` (þáttur sem er kominn út) eða `hinrik.html` (ekkert myndband enn). Hver kafli fær `id="kafli-…"`.
-3. **Skráin.** Ein færsla í `EPISODES`: slóð, skrá, númer, mánuður, heiti, stutt heiti á myndramma, lengd, ágrip, lýsing, kaflar, hráefni, gestir. `yt` bætist við þegar myndbandið er komið á YouTube; þá verður þátturinn „nýjasti þátturinn“ á forsíðunni. `reviewOnly: true` heldur þætti utan útgáfu.
+2. **Síðan.** Ný skrá í `src/pages/`, byggð á `gormanudur.html` (gestgjafarnir tveir) eða `hinrik.html` (þáttur með gesti). Þáttur án myndbands sleppir `{{POSTER}}` og spilunarhnappnum úr myndrammanum. Hver kafli fær `id="kafli-…"`.
+3. **Skráin.** Ein færsla í `EPISODES`: slóð, skrá, númer, mánuður, heiti, stutt heiti á myndramma, lengd, ágrip, lýsing, kaflar, hráefni, gestir. `yt` bætist við þegar myndbandið er komið á YouTube; þá verður númeraður þáttur „nýjasti þátturinn“ á forsíðunni (aukaþáttur án númers, eins og tilraunaþátturinn, verður það ekki). Kaflatímar eru sekúndur inn í klippið sem er á YouTube. `reviewOnly: true` heldur þætti utan útgáfu.
 4. **Byggja.** `node build.mjs`. Samræmisathugunin stöðvar bygginguna ef þátt vantar á síðu sem á að sýna hann, ef kafli í skránni er ekki í textanum, ef mánuðurinn á engan lit, eða ef `reviewOnly`-þáttur lekur inn í útgáfu.
 5. **Skoða.** Smella í gegn á prufuslóðinni: forsíða → þættir → þáttasíða → fólkið → almanak.
 6. **Samþykki.** Karl Petersen les textann. Gestur samþykkir það sem um hann er sagt áður en það fer af prufuslóð.

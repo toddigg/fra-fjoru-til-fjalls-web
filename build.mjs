@@ -46,21 +46,23 @@ const EP1 = {
   ]
 };
 
-// Trial episode with a guest, recorded 30 Oct 2026 before episode 1. No published video yet, so
-// no `yt`: the page shows an empty frame and plain chapter times. Times are the screening cut v3
-// (timeline + 11 s opening) and move when the episode is cut. No confirmed origins, so no marks.
+// Trial episode with a guest, recorded 30 Oct 2026 before episode 1. The video is the v3 cut
+// (59:30) uploaded to YouTube 26 Nov 2026. Chapter times are seconds into that cut, taken from the
+// chapter markers on the Resolve timeline "EP00 - Pilot - v3 (frumgögn)"; they move if the episode
+// is re-cut and uploaded again. No confirmed origins, so no marks.
 const PILOT = {
+  yt: "sewO0hAPYRg",
   chapters: [
-    [53, "kafli-tilraun", "Tilraun við borðið"],
-    [384, "kafli-leidin", "Leiðin í eldhúsið"],
-    [1057, "kafli-eldhus", "Veruleikinn í eldhúsinu"],
-    [1289, "kafli-kennsla", "Kennari með puttana í pottinum"],
-    [3382, "kafli-eldur", "Eldur og náttúra"],
-    [3850, "kafli-kartafla", "Kartaflan"],
-    [4336, "kafli-brennivin", "Brennivínið og stoltið"],
-    [4773, "kafli-saga", "Sagan á diskinum"],
-    [5872, "kafli-skyr", "Hvað er íslenskt?"],
-    [6255, "kafli-omma", "Ömmumatur úr Hrísey"]
+    [48, "kafli-tilraun", "Tilraun við borðið"],
+    [249, "kafli-leidin", "Leiðin í eldhúsið"],
+    [615, "kafli-eldhus", "Veruleikinn í eldhúsinu"],
+    [759, "kafli-kennsla", "Kennari með puttana í pottinum"],
+    [1486, "kafli-eldur", "Eldur og náttúra"],
+    [1817, "kafli-kartafla", "Kartaflan"],
+    [2303, "kafli-brennivin", "Brennivínið og stoltið"],
+    [2439, "kafli-saga", "Sagan á diskinum"],
+    [2609, "kafli-skyr", "Hvað er íslenskt?"],
+    [3010, "kafli-omma", "Ömmumatur úr Hrísey"]
   ],
   larder: [
     ["i-kartafla", "Kartaflan", "Eyðieyjuhráefnið"],
@@ -87,15 +89,17 @@ const EPISODES = [
     desc: "Í fyrsta þætti segja Þorvarður Goði og Karl Petersen frá því hvert ferðinni er heitið: fólkið á bak við matinn, gamla tímatalið og íslenskt hráefni.",
     who: { head: "Gestgjafarnir tveir", sub: "Karl Petersen og Þorvarður Goði", href: "/folkid/" }, guests: [] },
   { ...PILOT, slug: "hinrik", file: "hinrik.html", n: null, month: 0, reviewOnly: true,
-    tag: "Tilraunaþáttur", stamp: "Tilraunaþáttur", open: "Opna tilraunaþáttinn", watch: "Lesa um tilraunaþáttinn", back: "Aftur í tilraunaþáttinn",
-    title: "Tilraunaþáttur: sagan á diskinum", short: "Sagan á diskinum", length: "Ekki kominn út", cta: "Lesa",
+    tag: "Tilraunaþáttur", stamp: "Tilraunaþáttur", open: "Opna tilraunaþáttinn", watch: "Horfa á tilraunaþáttinn", back: "Aftur í tilraunaþáttinn",
+    title: "Tilraunaþáttur: sagan á diskinum", short: "Sagan á diskinum", length: "Um 60 mín.", cta: "Horfa og lesa",
     frame: { seed: 23, lines: 5, from: 0.44 },
     blurb: "Hinrik Carl Ellertsson matreiðslukennari er fyrsti gesturinn við borðið, í tilraun sem tekin var upp á undan 1. þætti: leiðin í eldhúsið, kartaflan, hundasúran og hvers vegna skyr er það eina sem kalla má íslenskt.",
     desc: "Tilraunaþáttur með Hinriki Carli Ellertssyni matreiðslukennara: leiðin í eldhúsið, kartaflan, hundasúran og hvers vegna skyr er það eina sem kalla má íslenskt.",
     guests: [{ name: "Hinrik Carl Ellertsson", role: "Matreiðslukennari í MK", status: "Bíður samþykkis gests" }] }
 ];
 const SHOWN = EPISODES.filter(e => !(e.reviewOnly && INDEXABLE));
-const LATEST = [...SHOWN].reverse().find(e => e.yt) || SHOWN[0];            // the newest episode that is out
+// The newest numbered episode that is out. An extra such as the trial episode never becomes
+// "the latest" on the front page, even when its video is up.
+const LATEST = [...SHOWN].reverse().find(e => e.yt && e.n) || [...SHOWN].reverse().find(e => e.yt) || SHOWN[0];
 const ORIGIN_EP = SHOWN.find(e => e.larder.some(l => l[3])) || LATEST;     // the episode whose origins the map shows
 const HOST_STILLS = EP1.yt;                                                 // the hosts' portraits are stills from episode 1
 const epHref = e => `${BASE}/thaettir/${e.slug}/`;
