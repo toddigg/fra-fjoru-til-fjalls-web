@@ -51,7 +51,7 @@ const EP1 = {
 // chapter markers on the Resolve timeline "EP00 - Pilot - v3 (frumgögn)"; they move if the episode
 // is re-cut and uploaded again. No confirmed origins, so no marks.
 const PILOT = {
-  yt: "sewO0hAPYRg",
+  yt: "sewO0hAPYRg", still: 2, // the uploaded thumbnail has its own title; frame 2 is Hinrik at the table
   chapters: [
     [48, "kafli-tilraun", "Tilraun við borðið"],
     [249, "kafli-leidin", "Leiðin í eldhúsið"],
@@ -301,7 +301,11 @@ const origins = ep => ep.larder.filter(l => l[3]).map(([id, n, , o]) => `<li cla
 
 // ---------- small pieces ----------
 const THREAD = `<svg class="thread" viewBox="0 0 1072 40" aria-hidden="true"><path d="M8 20C120 -8 250 48 373 20S620 -8 739 20S960 48 1064 22"/><circle class="on" cx="8" cy="20" r="7"/><circle cx="373" cy="20" r="7"/><circle cx="739" cy="20" r="7"/></svg>`;
-const poster = yt => !yt ? "" : `<img class="poster" src="https://i.ytimg.com/vi/${yt}/maxresdefault.jpg" data-fallback="https://i.ytimg.com/vi/${yt}/hqdefault.jpg" alt="" decoding="async"><span class="scrim"></span>`;
+// The picture behind an episode's frame comes from YouTube. `still: 1|2|3` picks one of the three
+// frames YouTube takes from the video itself; without it the video's own thumbnail is used. An
+// uploaded thumbnail carries its own title, so an episode that has one needs a `still`.
+const poster = e => { if (!e.yt) return ""; const [big, small] = e.still ? ["maxres" + e.still, "hq" + e.still] : ["maxresdefault", "hqdefault"];
+  return `<img class="poster" src="https://i.ytimg.com/vi/${e.yt}/${big}.jpg" data-fallback="https://i.ytimg.com/vi/${e.yt}/${small}.jpg" alt="" decoding="async"><span class="scrim"></span>`; };
 const pad = n => String(n).padStart(2, "0");
 const mmss = s => s < 3600 ? pad(Math.floor(s / 60)) + ":" + pad(s % 60) : Math.floor(s / 3600) + ":" + pad(Math.floor(s % 3600 / 60)) + ":" + pad(s % 60);
 const chapters = ep => ep.chapters.map(([s, id, title]) =>
@@ -324,7 +328,7 @@ const months = (from, to) => {
 // ---------- blocks drawn from the episode register ----------
 const epCard = (e, label) => `<div class="two">
       <a class="frame r16x9 film" href="${epHref(e)}" aria-label="${e.open}">
-        <canvas class="contours" data-seed="${e.frame.seed}" data-lines="${e.frame.lines}" data-from="${e.frame.from}" aria-hidden="true"></canvas>${poster(e.yt)}
+        <canvas class="contours" data-seed="${e.frame.seed}" data-lines="${e.frame.lines}" data-from="${e.frame.from}" aria-hidden="true"></canvas>${poster(e)}
         <span class="frame-words">
           <span class="label stamp"><i></i>${e.stamp} · ${MONTHS[e.month]}</span>
           <span class="title">${e.short}</span>
@@ -398,7 +402,7 @@ function render(page) {
     LATEST_HREF: epHref(LATEST), LATEST_WATCH: LATEST.watch,
     ORIGIN_EP_LABEL: `${ORIGIN_EP.tag} · ${MONTHS[ORIGIN_EP.month]}`, ORIGIN_EP_HREF: epHref(ORIGIN_EP), ORIGIN_EP_BACK: ORIGIN_EP.back,
     "WHEEL:sm": wheel("sm"), "WHEEL:lg": wheel("lg"),
-    POSTER: poster(ep.yt), YT: ep.yt || "",
+    POSTER: poster(ep), YT: ep.yt || "",
     CHAPTERS: chapters(ep), LARDER: larder(ep),
     MAP: originMap(ORIGIN_EP), PROFILE: profile(), ORIGINS: origins(ORIGIN_EP), "ROSE": rose("V"), "LADDER": ladder(1),
     "MONTHS:winter": months(0, 6), "MONTHS:summer": months(6, 12)
